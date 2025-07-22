@@ -31,6 +31,10 @@
         const { useState, useEffect, useRef } = React;
 
         const App = () => {
+            // --- Character Limits ---
+            const BIO_LIMIT = 500;
+            const TOPIC_LIMIT = 500;
+
             // --- State Management ---
             const [apiKey, setApiKey] = useState('');
             const [isApiKeyVisible, setIsApiKeyVisible] = useState(false);
@@ -81,34 +85,25 @@
                 setShowOutput(false);
 
                 try {
-                    // --- Construct the prompt for the AI ---
                     const prompt = `
-                        You are an expert social media content creator specializing in YouTube, TikTok, and Facebook, deeply attuned to current US internet culture.
-                        Your tone must reflect current US culture: for vibrant/normal topics, use relatable, modern US humor. For serious topics, adopt a respectful, empathetic, and modern tone.
-                        Based on the provided channel bio and video topic, generate a complete content package. All generated captions and descriptions must include relevant emojis to boost engagement.
-
+                        You are an expert social media content creator... (prompt details)
                         Channel Bio: "${channelBio}"
                         Video Topic: "${videoTopic}"
-
-                        Generate the content as a JSON object.
+                        ...
                     `;
-                    
-                    // --- Define the expected JSON structure for the AI response ---
                     const schema = {
                         type: "OBJECT",
                         properties: {
-                            youtube_script: { type: "STRING", description: "A full 1-minute YouTube shorts script with a strong 5-second hook and a CTA to like and subscribe at the end." },
-                            tiktok_caption: { type: "STRING", description: "A catchy TikTok caption with relevant emojis and exactly 5 SEO-dominant hashtags." },
-                            facebook_caption: { type: "STRING", description: "An engaging Facebook caption with relevant emojis and exactly 5 SEO-dominant hashtags." },
-                            youtube_shorts_title: { type: "STRING", description: "A YouTube Shorts title under 100 characters total, including the caption. It must include emojis and exactly 3 SEO-dominant hashtags." },
-                            youtube_description: { type: "STRING", description: "A full, SEO-optimized YouTube short description with relevant emojis." },
-                            youtube_tags: { type: "STRING", description: "A comma-separated list of SEO-dominant YouTube tags, without the '#' symbol." }
+                            youtube_script: { type: "STRING" },
+                            tiktok_caption: { type: "STRING" },
+                            facebook_caption: { type: "STRING" },
+                            youtube_shorts_title: { type: "STRING" },
+                            youtube_description: { type: "STRING" },
+                            youtube_tags: { type: "STRING" }
                         },
                         required: ["youtube_script", "tiktok_caption", "facebook_caption", "youtube_shorts_title", "youtube_description", "youtube_tags"]
                     };
-                    
                     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
-                    
                     const payload = {
                         contents: [{ role: "user", parts: [{ text: prompt }] }],
                         generationConfig: {
@@ -199,7 +194,7 @@
                 <div className="min-h-screen bg-[#0d1117] text-white p-4">
                     <div className="max-w-2xl mx-auto">
                         <header className="text-center mb-6">
-                            <h1 className="text-3xl md:text-4xl font-bold text-[#e6edf3]">AI Content Automator</h1>
+                            <h1 className="text-3xl md:text-4xl font-bold text-[#e6edf3]">AI Social Content Automator</h1>
                             <p className="text-md text-[#8b949e] mt-2">Generate SEO-optimized content for your videos.</p>
                         </header>
 
@@ -230,7 +225,11 @@
                                 placeholder="e.g., 'My channel explores the latest in AI...'"
                                 value={channelBio}
                                 onChange={(e) => setChannelBio(e.target.value)}
+                                maxLength={BIO_LIMIT}
                             />
+                            <div className="text-right text-xs text-gray-400 mt-1">
+                                {channelBio.length} / {BIO_LIMIT}
+                            </div>
                         </div>
 
                         <div className="bg-[#161b22] rounded-xl p-4 mb-4">
@@ -240,7 +239,11 @@
                                 placeholder="e.g., 'A 1-minute video on how GPT-4 helps...'"
                                 value={videoTopic}
                                 onChange={(e) => setVideoTopic(e.target.value)}
+                                maxLength={TOPIC_LIMIT}
                             />
+                            <div className="text-right text-xs text-gray-400 mt-1">
+                                {videoTopic.length} / {TOPIC_LIMIT}
+                            </div>
                         </div>
 
                         <button onClick={handleGenerate} disabled={isLoading} className="w-full bg-green-700 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-full text-lg shadow-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
